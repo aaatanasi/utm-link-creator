@@ -1,6 +1,13 @@
 const {test}=require('node:test');
 const assert=require('node:assert/strict');
-const {buildUtmLink}=require('./utm');
+const {readFileSync}=require('node:fs');
+const {join}=require('node:path');
+const {runInNewContext}=require('node:vm');
+const document={querySelector:()=>({addEventListener(){}})};
+const {buildUtmLink}=runInNewContext(
+  readFileSync(join(__dirname,'app.js'),'utf8')+'\n;({buildUtmLink})',
+  {document,URL}
+);
 const fields={destination:'https://example.com/catalog?color=red&color=blue&utm_campaign=old&utm_campaign=older&utm_content=old#looks',brand:'Étoile North',season:'Fall Winter 2027',catalog:'Lookbook'};
 test('normalizes labels and preserves unrelated repeated parameters and fragment',()=>{
   const url=new URL(buildUtmLink(fields));
